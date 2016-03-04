@@ -2,8 +2,10 @@ package com.example.cv.weathermate;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -56,7 +58,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_forecastfragment,menu);
+        inflater.inflate(R.menu.menu_forecastfragment, menu);
 
     }
 
@@ -67,8 +69,8 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
 
         int id = item.getItemId();
-        if( id == R.id.action_refresh){
-            new FetchWeatherTask().execute("Boston,US");
+        if( id == R.id.action_refresh) {
+            updateWeather();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -77,13 +79,6 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         List<String> forecastData = new ArrayList<String>();
-        forecastData.add("Today-Sunny-28/01");
-        forecastData.add("Tomorrow-foggy-29/01");
-        forecastData.add("Saturday-rainy-30/01");
-        forecastData.add("Sunday-cloudy-31/01");
-        forecastData.add("Monday-Snow-1/02");
-        forecastData.add("Tuesday-cloud-2/02");
-        forecastData.add("Wednesday-rainy-03/03");
 
         forecastDataAdapter = new ArrayAdapter<String>(
                 //current context (this fragment's parent activity
@@ -109,6 +104,19 @@ public class ForecastFragment extends Fragment {
         });
         return rootView;
     }
+    @Override
+    public void onStart(){
+        super.onStart();
+        updateWeather();
+    }
+    private void updateWeather(){
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        String location = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .getString(getString(R.string.pref_location_key),
+                        getString(R.string.pref_location_default));
+        weatherTask.execute(location);
+    }
+
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
@@ -201,6 +209,27 @@ public class ForecastFragment extends Fragment {
             }
         }
 
+        private String formatHighLows(double high, double low){
+            SharedPreferences shared =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unitType = shared.getString(
+                    getString(R.string.units_list),
+                    getString(R.string.units_metric));
+
+            if( unitType.equals(getString(R.string.units_imperial))) {
+                high = (high*1.8) + 32;
+                low = (low*1.8) + 32;
+            }else if(!unitType.equals(getString(R.string.units_metric))){
+                Log.d(LOG_TAG,"Unit type not found: "+unitType);
+            }
+
+            long roundedHigh = Math.round(high);
+            long roundedLow = Math.round(low);
+
+            String highLowStr = roundedHigh + "/" + roundedLow;
+            return highLowStr;
+        }
+
         @Override
         protected void onPostExecute(String[] result){
             if(result != null){
@@ -220,17 +249,6 @@ public class ForecastFragment extends Fragment {
             return shortenedDateFormat.format(time);
         }
 
-        /**
-         * Prepare the weather high/lows for presentation.
-         */
-        private String formatHighLows(double high, double low) {
-            // For presentation, assume the user doesn't care about tenths of a degree.
-            long roundedHigh = Math.round(high);
-            long roundedLow = Math.round(low);
-
-            String highLowStr = roundedHigh + "/" + roundedLow;
-            return highLowStr;
-        }
 
         /**
          * Take the String representing the complete forecast in JSON Format and
