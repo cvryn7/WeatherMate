@@ -8,7 +8,7 @@
     tools:context="com.example.cv.weathermate.DetailActivity"
     android:id="@+id/container">
 
-    <include layout="@layout/content_detail" />
+    <include layout="@layout/fragment_detail" />
 
 
 </android.support.design.widget.CoordinatorLayout>
