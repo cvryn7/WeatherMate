@@ -36,6 +36,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.cv.weathermate.MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.example.cv.weathermate"
+            android:name=".data.WeatherProvider"
+            />
     </application>
 
 </manifest>

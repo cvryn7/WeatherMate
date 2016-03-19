@@ -93,8 +93,10 @@ public class TestDb extends AndroidTestCase {
         locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING);
 
         int columnNameIndex = c.getColumnIndex("name");
+
         do {
             String columnName = c.getString(columnNameIndex);
+            assertTrue("columnNameIndex "+columnName,false);
             locationColumnHashSet.remove(columnName);
         } while(c.moveToNext());
 
