@@ -17,13 +17,23 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String FORECASTFRAGMENT_TAG = "FFTAG";
+
+    private String mLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+       // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+       // setSupportActionBar(toolbar);
+        if( savedInstanceState == null){
+            //getSupportFragmentManager().beginTransaction()
+             //       .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
+              //      .commit();
+        }
+
     }
 
     @Override
@@ -73,6 +83,20 @@ public class MainActivity extends AppCompatActivity {
         }else{
             Log.d(LOG_TAG, "Couldn't call " + location);
         }
+    }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        String location = Utility.getPreferredLocation(this);
+        //update the location in our second pane using the fragment manager
+        if( location != null && !location.equals(mLocation)){
+            ForecastFragment fFragment = (ForecastFragment)getSupportFragmentManager()
+                    .findFragmentById(R.id.fragment);
+            if( fFragment != null){
+                fFragment.onLocationChanged();
+            }
+            mLocation = location;
+        }
     }
 }

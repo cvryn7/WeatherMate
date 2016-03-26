@@ -104,13 +104,24 @@ LoaderManager.LoaderCallbacks<Cursor>{
         final ListView forecastListView = (ListView)rootView.findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastDataAdapter);
 
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //CursorAdapter returns a cursor at the correct postion for getItem(), or null
+                //if it cannot see to that position.
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null) {
+                    String locationSetting = Utility.getPreferredLocation(getActivity());
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+                            .setData(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                                    locationSetting, cursor.getLong(COL_WEATHER_DATE)
+                            ));
+                    startActivity(intent);
+                }
+            }
+        });
 
         return rootView;
-    }
-    @Override
-    public void onStart(){
-        super.onStart();
-        updateWeather();
     }
 
     @Override
@@ -127,6 +138,12 @@ LoaderManager.LoaderCallbacks<Cursor>{
         weatherTask.execute(location);
     }
 
+    // since we read the location when we create the loader, all we need
+    // to do is restart
+    void onLocationChanged(){
+        updateWeather();
+        getLoaderManager().restartLoader(LOARDER_ID,null,this);
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle){
