@@ -3,6 +3,7 @@ package com.example.cv.weathermate;
         import android.content.Context;
         import android.database.Cursor;
         import android.support.v4.widget.CursorAdapter;
+        import android.util.Log;
         import android.view.LayoutInflater;
         import android.view.View;
         import android.view.ViewGroup;
@@ -52,13 +53,22 @@ public class ForecastAdapter extends CursorAdapter {
         //Get view holder object tag from the view
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        // Read weather icon ID from cursor
-        int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_ID);
+        int imageResourceId = -1;
+        // Read weather ID from cursor
+        int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
+        if( getItemViewType(cursor.getPosition()) == VIEW_TYPE_TODAY){
+            imageResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
+        }else if( getItemViewType(cursor.getPosition()) == VIEW_TYPE_FUTURE_DAY){
+            imageResourceId = Utility.getIconResourceForWeatherCondition(weatherId);
+        }
+
         // Use placeholder image for now
-        viewHolder.iconView.setImageResource(R.mipmap.clouds);
+        Log.e("WeatherID",String.valueOf(weatherId));
+        Log.e("imageResourceId",String.valueOf(imageResourceId));
+        viewHolder.iconView.setImageResource(imageResourceId);
 
         long date = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
-        String friendlyDate = Utility.getFriendlyDayString(context,date);
+        String friendlyDate = Utility.getFriendlyDayString(context, date);
         viewHolder.dateView.setText(friendlyDate);
 
         String weatherDesc = cursor.getString(ForecastFragment.COL_WEATHER_DESC);

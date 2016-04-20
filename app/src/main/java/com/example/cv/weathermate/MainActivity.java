@@ -17,23 +17,27 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String FORECASTFRAGMENT_TAG = "FFTAG";
-
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private String mLocation = null;
+
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-       // setSupportActionBar(toolbar);
-        if( savedInstanceState == null){
-            //getSupportFragmentManager().beginTransaction()
-             //       .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-              //      .commit();
-        }
 
+        if( findViewById(R.id.weather_detail_container) != null){
+            mTwoPane = true;
+            if( savedInstanceState == null){
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.weather_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+        }
     }
 
     @Override
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         //update the location in our second pane using the fragment manager
         if( location != null && !location.equals(mLocation)){
             ForecastFragment fFragment = (ForecastFragment)getSupportFragmentManager()
-                    .findFragmentById(R.id.fragment);
+                    .findFragmentById(R.id.fragment_forecast);
             if( fFragment != null){
                 fFragment.onLocationChanged();
             }
